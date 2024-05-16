@@ -1,24 +1,24 @@
-import 'package:cashier/boxes.dart';
-import 'package:cashier/product.dart';
-import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+// main.dart
 
-// Declare the global variable using late
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'input_modal.dart';
+import 'product.dart';
+import 'boxes.dart';
+
 late Box<Product> boxProducts;
 
 void main() async {
-  // Initialize Hive
   await Hive.initFlutter();
   Hive.registerAdapter(ProductAdapter());
-
-  // Open the box and assign it to the global variable
   boxProducts = await Hive.openBox<Product>('productsBox');
-
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -35,23 +35,29 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
   final String title;
+
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  late final Box<Product> boxProducts;
   final TextEditingController nameController = TextEditingController();
   final TextEditingController categoryController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
   final TextEditingController quantityController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    boxProducts = Hive.box<Product>('productsBox');
+  }
+
+  @override
   void dispose() {
-    // Dispose of the controllers when no longer needed
     nameController.dispose();
     categoryController.dispose();
     priceController.dispose();
@@ -59,95 +65,86 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
+  void _showInputModal(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return InputModal(
+          nameController: nameController,
+          categoryController: categoryController,
+          priceController: priceController,
+          quantityController: quantityController,
+          onAdd: (String name, String category, int price, int quantity) {
+            setState(() {
+              boxProducts.put(
+                'key_$name',
+                Product(
+                  name: name,
+                  category: category,
+                  price: price,
+                  quantity: quantity,
+                ),
+              );
+            });
+            Navigator.pop(context); // Close the modal after adding
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
+      backgroundColor: Color.fromRGBO(15, 12, 15, 1),
+      // appBar: AppBar(
+      //   backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      //   title: Text(widget.title),
+      // ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Column(
-                    children: [
-                      TextField(
-                        controller: nameController,
-                        keyboardType: TextInputType.text,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: 'Product Name',
-                        ),
-                      ),
-                      const SizedBox(height: 10.0),
-                      TextField(
-                        controller: categoryController,
-                        keyboardType: TextInputType.text,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: 'Category',
-                        ),
-                      ),
-                      TextField(
-                        controller: priceController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: 'Price',
-                        ),
-                      ),
-                      TextField(
-                        controller: quantityController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: 'Quantity',
-                        ),
-                      ),
-                      const SizedBox(height: 10.0),
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            final name = nameController.text;
-                            final category = (categoryController.text);
-                            final price = int.tryParse(priceController.text);
-                            final quantity =
-                                int.tryParse(quantityController.text);
-
-                            if (name.isNotEmpty &&
-                                category.isNotEmpty &&
-                                price != null &&
-                                quantity != null) {
-                              boxProducts.put(
-                                'key_$name',
-                                Product(
-                                  name: name,
-                                  category: category,
-                                  price: price,
-                                  quantity: quantity,
-                                ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Onk seng error cik'),
-                                ),
-                              );
-                            }
-                          });
-                        },
-                        child: const Text('Add'),
-                      ),
-                    ],
-                  ),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(10.0),
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.blue),
+                    borderRadius: BorderRadius.circular(5)),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Total Items : ${boxProducts.length}',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w500, color: Colors.white),
+                    ),
+                    Text(
+                      'Total Income : Belum jualan Cik nguawur',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w500, color: Colors.white),
+                    )
+                  ],
                 ),
+              ),
+              Row(
+                children: [
+                  ElevatedButton(
+                    onPressed: () => _showInputModal(context),
+                    child: Text('Add Product'),
+                  ),
+                  Expanded(
+                      child: TextField(
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: 'Enter a search term',
+                    ),
+                  ))
+                ],
               ),
               const SizedBox(height: 10.0),
               Expanded(
@@ -162,15 +159,13 @@ class _MyHomePageState extends State<MyHomePage> {
                             child: Text('No data available'),
                           );
                         }
-
                         return ListView.builder(
                           itemCount: box.length,
                           itemBuilder: (context, index) {
                             final product = box.getAt(index);
                             if (product == null) {
-                              return Container(); // Handle null person
+                              return Container();
                             }
-
                             return ListTile(
                               title: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,15 +176,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                   Text('Quantity : ${product.quantity}'),
                                 ],
                               ),
-
                               leading: IconButton(
                                 icon: const Icon(Icons.remove_circle),
                                 onPressed: () {
-                                  // Delete item
                                   box.deleteAt(index);
                                 },
                               ),
-                              // title:
                             );
                           },
                         );
