@@ -1,5 +1,3 @@
-// input_modal.dart
-
 import 'package:flutter/material.dart';
 
 class InputModal extends StatelessWidget {
@@ -20,67 +18,132 @@ class InputModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          TextField(
-            controller: nameController,
-            keyboardType: TextInputType.text,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 15, left: 5, right: 5, bottom: 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Add New Product',
+              style: TextStyle(fontSize: 25, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 20.0),
+            _buildTextField(
+              controller: nameController,
               hintText: 'Product Name',
+              keyboardType: TextInputType.text,
             ),
-          ),
-          const SizedBox(height: 10.0),
-          TextField(
-            controller: categoryController,
-            keyboardType: TextInputType.text,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
+            const SizedBox(height: 10.0),
+            _buildTextField(
+              controller: categoryController,
               hintText: 'Category',
+              keyboardType: TextInputType.text,
             ),
-          ),
-          TextField(
-            controller: priceController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
+            const SizedBox(height: 10.0),
+            _buildTextField(
+              controller: priceController,
               hintText: 'Price',
+              keyboardType: TextInputType.number,
             ),
-          ),
-          TextField(
-            controller: quantityController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
+            const SizedBox(height: 10.0),
+            _buildTextField(
+              controller: quantityController,
               hintText: 'Quantity',
+              keyboardType: TextInputType.number,
             ),
-          ),
-          const SizedBox(height: 10.0),
-          TextButton(
-            onPressed: () {
-              final name = nameController.text;
-              final category = categoryController.text;
-              final price = int.tryParse(priceController.text);
-              final quantity = int.tryParse(quantityController.text);
-
-              if (name.isNotEmpty &&
-                  category.isNotEmpty &&
-                  price != null &&
-                  quantity != null) {
-                onAdd(name, category, price, quantity);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please fill all fields correctly.'),
+            const SizedBox(height: 20.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor:
+                        const MaterialStatePropertyAll<Color>(Colors.white),
+                    foregroundColor: const MaterialStatePropertyAll(
+                        Color.fromRGBO(255, 83, 137, 1)),
+                    shape: MaterialStatePropertyAll<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    ),
                   ),
-                );
-              }
-            },
-            child: const Text('Add'),
-          ),
-        ],
+                  onPressed: () {},
+                  child: const Text('Close'),
+                ),
+                const SizedBox(
+                  width: 10,
+                ),
+                ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: const MaterialStatePropertyAll<Color>(
+                        Color.fromRGBO(255, 83, 137, 1)),
+                    foregroundColor:
+                        const MaterialStatePropertyAll(Colors.white),
+                    shape: MaterialStatePropertyAll<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                    ),
+                  ),
+                  onPressed: () {
+                    final name = nameController.text;
+                    final category = categoryController.text;
+                    final price = int.tryParse(priceController.text);
+                    final quantity = int.tryParse(quantityController.text);
+
+                    if (name.isNotEmpty &&
+                        category.isNotEmpty &&
+                        price != null &&
+                        quantity != null) {
+                      onAdd(name, category, price, quantity);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please fill all fields correctly.'),
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text('Add'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    required TextInputType keyboardType,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(5.0),
+          borderSide: const BorderSide(color: Colors.grey),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(5.0),
+          borderSide: const BorderSide(color: Colors.grey),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(5.0),
+          borderSide: const BorderSide(color: Colors.blue),
+        ),
+        hintText: hintText,
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 15.0,
+          horizontal: 20.0,
+        ),
       ),
     );
   }
