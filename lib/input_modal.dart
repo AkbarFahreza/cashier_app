@@ -18,9 +18,11 @@ class InputModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return AnimatedContainer(
+      // transform: ,
+      duration: const Duration(milliseconds: 300),
       padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 10.0,
       ),
       child: Padding(
         padding: const EdgeInsets.only(top: 15, left: 5, right: 5, bottom: 10),
@@ -71,7 +73,9 @@ class InputModal extends StatelessWidget {
                       ),
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
                   child: const Text('Close'),
                 ),
                 const SizedBox(

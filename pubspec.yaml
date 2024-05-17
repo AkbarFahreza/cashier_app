@@ -33,6 +33,7 @@ dependencies:
   hive:
   hive_flutter:
   path_provider:
+  flutter_slidable:
 
 
   # The following adds the Cupertino Icons font to your application.

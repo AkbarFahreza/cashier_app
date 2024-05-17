@@ -1,12 +1,7 @@
-// main.dart
-
 import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart';
-// import 'package:flutter/widgets.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'input_modal.dart';
 import 'product.dart';
-// import 'boxes.dart';
 
 late Box<Product> boxProducts;
 
@@ -44,7 +39,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  late final Box<Product> boxProducts;
   final TextEditingController nameController = TextEditingController();
   final TextEditingController categoryController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
@@ -68,36 +62,39 @@ class _MyHomePageState extends State<MyHomePage> {
   void _showInputModal(BuildContext context) {
     showDialog(
       context: context,
-      barrierDismissible:
-          false, // Prevents closing the modal by tapping outside
+      barrierDismissible: true, // Prevents closing the modal by tapping outside
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5.0),
+            borderRadius: BorderRadius.circular(10.0),
           ),
           content: InputModal(
-            nameController: TextEditingController(),
-            categoryController: TextEditingController(),
-            priceController: TextEditingController(),
-            quantityController: TextEditingController(),
-            onAdd: (name, category, price, quantity) {
-              // Handle the add action
-              Navigator.of(context).pop(); // Close the modal
-            },
+            nameController: nameController,
+            categoryController: categoryController,
+            priceController: priceController,
+            quantityController: quantityController,
+            onAdd: _addProduct,
           ),
         );
       },
     );
   }
 
+  void _addProduct(String name, String category, int price, int quantity) {
+    final newProduct = Product(
+      name: name,
+      category: category,
+      price: price,
+      quantity: quantity,
+    );
+
+    boxProducts.add(newProduct);
+    Navigator.of(context).pop(); // Close the modal after adding the product
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: Color.fromRGBO(15, 12, 15, 1),
-      // appBar: AppBar(
-      //   backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      //   title: Text(widget.title),
-      // ),
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -111,28 +108,30 @@ class _MyHomePageState extends State<MyHomePage> {
                   height: 70,
                   padding: const EdgeInsets.all(15.0),
                   decoration: BoxDecoration(
-                      // border: Border.all(color: Colors.blue),
-                      color: const Color.fromRGBO(252, 203, 102, 1),
-                      borderRadius: BorderRadius.circular(5)),
+                    color: const Color.fromRGBO(252, 203, 102, 1),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        boxProducts.length == 0
+                        boxProducts.isEmpty
                             ? 'Total Items : Belum ada'
                             : 'Total Item : ${boxProducts.length}',
                         style: const TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black,
-                            fontSize: 15),
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                          fontSize: 15,
+                        ),
                       ),
                       const Text(
                         'Total Income : Belum jualan',
                         style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black,
-                            fontSize: 15),
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                          fontSize: 15,
+                        ),
                       )
                     ],
                   ),
@@ -143,9 +142,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     ElevatedButton(
                       style: ButtonStyle(
                         backgroundColor: const MaterialStatePropertyAll<Color>(
-                            Color.fromRGBO(255, 83, 137, 1)),
-                        foregroundColor:
-                            const MaterialStatePropertyAll(Colors.white),
+                          Color.fromRGBO(255, 83, 137, 1),
+                        ),
+                        foregroundColor: const MaterialStatePropertyAll(
+                          Colors.white,
+                        ),
                         shape: MaterialStatePropertyAll<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(5.0),
@@ -157,42 +158,46 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     const SizedBox(width: 10.0),
                     Expanded(
-                        child: SizedBox(
-                      height: 43,
-                      child: TextField(
-                        decoration: InputDecoration(
-                          suffixIcon: IconButton(
-                            onPressed: () {},
-                            icon: const Icon(Icons.search_rounded),
-                          ),
-                          suffixIconColor:
-                              const Color.fromRGBO(255, 83, 137, 1),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                            borderSide: const BorderSide(
-                                color: Color.fromRGBO(255, 83, 137, 1)),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                            borderSide: const BorderSide(
-                                color: Color.fromRGBO(255, 83, 137, 1)),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5.0),
-                            borderSide: const BorderSide(
-                                color: Color.fromRGBO(255, 83, 137, 1)),
-                          ),
-                          hintText: 'Cari Product',
-                          hintStyle: const TextStyle(fontSize: 15),
-                          contentPadding: const EdgeInsets.only(
-                            left: 15,
-                            bottom: 3,
-                            top: 3,
-                            right: 5,
+                      child: SizedBox(
+                        height: 43,
+                        child: TextField(
+                          decoration: InputDecoration(
+                            suffixIcon: IconButton(
+                              onPressed: () {},
+                              icon: const Icon(Icons.search_rounded),
+                            ),
+                            suffixIconColor:
+                                const Color.fromRGBO(255, 83, 137, 1),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                              borderSide: const BorderSide(
+                                color: Color.fromRGBO(255, 83, 137, 1),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                              borderSide: const BorderSide(
+                                color: Color.fromRGBO(255, 83, 137, 1),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5.0),
+                              borderSide: const BorderSide(
+                                color: Color.fromRGBO(255, 83, 137, 1),
+                              ),
+                            ),
+                            hintText: 'Cari Product',
+                            hintStyle: const TextStyle(fontSize: 15),
+                            contentPadding: const EdgeInsets.only(
+                              left: 15,
+                              bottom: 3,
+                              top: 3,
+                              right: 5,
+                            ),
                           ),
                         ),
                       ),
-                    ))
+                    )
                   ],
                 ),
                 const SizedBox(height: 10.0),
