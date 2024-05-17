@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 class InputModal extends StatelessWidget {
   final TextEditingController nameController;
@@ -46,16 +48,29 @@ class InputModal extends StatelessWidget {
               keyboardType: TextInputType.text,
             ),
             const SizedBox(height: 10.0),
-            _buildTextField(
-              controller: priceController,
-              hintText: 'Price',
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 10.0),
-            _buildTextField(
-              controller: quantityController,
-              hintText: 'Quantity',
-              keyboardType: TextInputType.number,
+            Row(
+              children: [
+                Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 2.5),
+                    child: _buildTextField(
+                      controller: priceController,
+                      hintText: 'Price',
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ),
+                Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 2.5),
+                    child: _buildTextField(
+                      controller: quantityController,
+                      hintText: 'Quantity',
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 20.0),
             Row(
@@ -127,26 +142,29 @@ class InputModal extends StatelessWidget {
     required String hintText,
     required TextInputType keyboardType,
   }) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(5.0),
-          borderSide: const BorderSide(color: Colors.grey),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(5.0),
-          borderSide: const BorderSide(color: Colors.grey),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(5.0),
-          borderSide: const BorderSide(color: Colors.blue),
-        ),
-        hintText: hintText,
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 15.0,
-          horizontal: 20.0,
+    return SizedBox(
+      height: 44,
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(5.0),
+            borderSide: const BorderSide(color: Colors.grey),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(5.0),
+            borderSide: const BorderSide(color: Colors.grey),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(5.0),
+            borderSide: const BorderSide(color: Colors.blue),
+          ),
+          hintText: hintText,
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 15.0,
+            horizontal: 20.0,
+          ),
         ),
       ),
     );

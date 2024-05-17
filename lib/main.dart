@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'input_modal.dart';
 import 'product.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 late Box<Product> boxProducts;
 
@@ -90,6 +92,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
     boxProducts.add(newProduct);
     Navigator.of(context).pop(); // Close the modal after adding the product
+  }
+
+  String formatCurrency(int amount) {
+    final NumberFormat formatter = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'IDR ',
+      decimalDigits: 0,
+    );
+    return formatter.format(amount);
   }
 
   @override
@@ -202,45 +213,109 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 const SizedBox(height: 10.0),
                 Expanded(
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: ValueListenableBuilder(
-                        valueListenable: boxProducts.listenable(),
-                        builder: (context, Box<Product> box, _) {
-                          if (box.isEmpty) {
-                            return const Center(
-                              child: Text('No data available'),
-                            );
-                          }
-                          return ListView.builder(
-                            itemCount: box.length,
-                            itemBuilder: (context, index) {
-                              final product = box.getAt(index);
-                              if (product == null) {
-                                return Container();
-                              }
-                              return ListTile(
-                                title: Column(
+                  child: Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: ValueListenableBuilder(
+                      valueListenable: boxProducts.listenable(),
+                      builder: (context, Box<Product> box, _) {
+                        if (box.isEmpty) {
+                          return const Center(
+                            child: Text('No item sell'),
+                          );
+                        }
+                        return ListView.builder(
+                          itemCount: box.length,
+                          itemBuilder: (context, index) {
+                            final product = box.getAt(index);
+                            if (product == null) {
+                              return Container();
+                            }
+                            return Slidable(
+                              endActionPane: ActionPane(
+                                motion: const ScrollMotion(),
+                                children: [
+                                  SlidableAction(
+                                    onPressed: (BuildContext context) {
+                                      box.deleteAt(index);
+                                    },
+                                    padding: const EdgeInsets.all(5),
+                                    backgroundColor:
+                                        const Color.fromRGBO(255, 83, 137, 1),
+                                    foregroundColor: Colors.white,
+                                    icon: Icons.delete,
+                                  ),
+                                  SlidableAction(
+                                    onPressed: (BuildContext context) {
+                                      box.deleteAt(index);
+                                    },
+                                    padding: const EdgeInsets.all(5),
+                                    backgroundColor:
+                                        const Color.fromARGB(255, 74, 152, 255),
+                                    foregroundColor: Colors.white,
+                                    icon: Icons.edit_note_rounded,
+                                  ),
+                                ],
+                              ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color:
+                                          Color.fromRGBO(255, 83, 137, 0.267)),
+                                  borderRadius: BorderRadius.circular(5.0),
+                                ),
+                                child: ListTile(
+                                    title: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Product : ${product.name}'),
-                                    Text('Category : ${product.category}'),
-                                    Text('Price : IDR${product.price}'),
-                                    Text('Quantity : ${product.quantity}'),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          '${product.name}',
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 18),
+                                        ),
+                                        Container(
+                                          margin:
+                                              const EdgeInsets.only(left: 7),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 5, vertical: 1),
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: const Color.fromARGB(
+                                                    255, 0, 0, 0)),
+                                            borderRadius:
+                                                BorderRadius.circular(2.0),
+                                          ),
+                                          child: Text(
+                                            '${product.quantity}',
+                                            style:
+                                                const TextStyle(fontSize: 13),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Text(
+                                      '${product.category}',
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    Text(
+                                      '${formatCurrency(product.price)}',
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w600),
+                                    ),
                                   ],
-                                ),
-                                leading: IconButton(
-                                  icon: const Icon(Icons.remove_circle),
-                                  onPressed: () {
-                                    box.deleteAt(index);
-                                  },
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
+                                )),
+                              ),
+                            );
+                          },
+                        );
+                      },
                     ),
                   ),
                 ),
