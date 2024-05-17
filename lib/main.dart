@@ -46,6 +46,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController priceController = TextEditingController();
   final TextEditingController quantityController = TextEditingController();
 
+  String selectedCategory = 'All';
+
   @override
   void initState() {
     super.initState();
@@ -91,6 +93,9 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     boxProducts.add(newProduct);
+    setState(() {
+      selectedCategory = 'All';
+    });
     Navigator.of(context).pop(); // Close the modal after adding the product
   }
 
@@ -101,6 +106,67 @@ class _MyHomePageState extends State<MyHomePage> {
       decimalDigits: 0,
     );
     return formatter.format(amount);
+  }
+
+  List<String> _getCategories() {
+    final categories =
+        boxProducts.values.map((product) => product.category).toSet().toList();
+    categories.sort();
+    categories.insert(0, 'All');
+    return categories;
+  }
+
+  Widget _buildCategoryButtons() {
+    final categories = _getCategories();
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: categories.map((category) {
+          final isSelected = category == selectedCategory;
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5.0),
+            child: ElevatedButton(
+              // style: ElevatedButton.styleFrom(
+              //   backgroundColor: isSelected
+              //       ? const Color.fromRGBO(255, 83, 137, 1)
+              //       : Colors.white,
+              //   foregroundColor: isSelected ? Colors.white : Colors.black,
+              //   side: BorderSide(
+              //     color: isSelected ? Colors.transparent : Colors.grey,
+              //   ),
+              // ),
+              style: ButtonStyle(
+                backgroundColor: isSelected
+                    ? const MaterialStatePropertyAll<Color>(
+                        Color.fromRGBO(255, 83, 137, 1),
+                      )
+                    : const MaterialStatePropertyAll<Color>(
+                        Colors.white,
+                      ),
+                foregroundColor: isSelected
+                    ? const MaterialStatePropertyAll(
+                        Colors.white,
+                      )
+                    : const MaterialStatePropertyAll(
+                        Colors.black,
+                      ),
+                shape: MaterialStatePropertyAll<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                ),
+              ),
+              onPressed: () {
+                setState(() {
+                  selectedCategory = category;
+                });
+              },
+              child: Text(category),
+            ),
+          );
+        }).toList(),
+      ),
+    );
   }
 
   @override
@@ -212,6 +278,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   ],
                 ),
                 const SizedBox(height: 10.0),
+                _buildCategoryButtons(),
+                const SizedBox(height: 10.0),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(2.0),
@@ -223,13 +291,18 @@ class _MyHomePageState extends State<MyHomePage> {
                             child: Text('No item sell'),
                           );
                         }
+
+                        final products = selectedCategory == 'All'
+                            ? box.values.toList()
+                            : box.values
+                                .where((product) =>
+                                    product.category == selectedCategory)
+                                .toList();
+
                         return ListView.builder(
-                          itemCount: box.length,
+                          itemCount: products.length,
                           itemBuilder: (context, index) {
-                            final product = box.getAt(index);
-                            if (product == null) {
-                              return Container();
-                            }
+                            final product = products[index];
                             return Slidable(
                               endActionPane: ActionPane(
                                 motion: const ScrollMotion(),
@@ -264,53 +337,55 @@ class _MyHomePageState extends State<MyHomePage> {
                                   borderRadius: BorderRadius.circular(5.0),
                                 ),
                                 child: ListTile(
-                                    title: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          '${product.name}',
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.w700,
-                                              fontSize: 18),
-                                        ),
-                                        Container(
-                                          margin:
-                                              const EdgeInsets.only(left: 7),
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 5, vertical: 1),
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                                color: const Color.fromARGB(
-                                                    255, 0, 0, 0)),
-                                            borderRadius:
-                                                BorderRadius.circular(2.0),
+                                  title: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                            product.name,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 18),
                                           ),
-                                          child: Text(
-                                            '${product.quantity}',
-                                            style:
-                                                const TextStyle(fontSize: 13),
+                                          Container(
+                                            margin:
+                                                const EdgeInsets.only(left: 7),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 5, vertical: 1),
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: const Color.fromARGB(
+                                                      255, 0, 0, 0)),
+                                              borderRadius:
+                                                  BorderRadius.circular(2.0),
+                                            ),
+                                            child: Text(
+                                              product.quantity.toString(),
+                                              style:
+                                                  const TextStyle(fontSize: 13),
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                    Text(
-                                      '${product.category}',
-                                      style: const TextStyle(
-                                        fontSize: 13,
+                                        ],
                                       ),
-                                    ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    Text(
-                                      '${formatCurrency(product.price)}',
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                  ],
-                                )),
+                                      Text(
+                                        product.category,
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      Text(
+                                        formatCurrency(product.price),
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             );
                           },
