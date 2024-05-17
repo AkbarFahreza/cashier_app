@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'input_modal.dart';
-import 'product.dart';
 import 'package:intl/intl.dart';
+import 'product.dart';
+import 'components/filter_category.dart'; // Import filterCategory.dart
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 late Box<Product> boxProducts;
@@ -45,8 +46,8 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController categoryController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
   final TextEditingController quantityController = TextEditingController();
-
-  String selectedCategory = 'All';
+  String selectedCategory = 'All'; // Define selectedCategory here
+  String resresh = 'Yess'; // Define selectedCategory here
 
   @override
   void initState() {
@@ -66,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _showInputModal(BuildContext context) {
     showDialog(
       context: context,
-      barrierDismissible: true, // Prevents closing the modal by tapping outside
+      barrierDismissible: true,
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
@@ -96,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       selectedCategory = 'All';
     });
-    Navigator.of(context).pop(); // Close the modal after adding the product
+    Navigator.of(context).pop();
   }
 
   String formatCurrency(int amount) {
@@ -106,67 +107,6 @@ class _MyHomePageState extends State<MyHomePage> {
       decimalDigits: 0,
     );
     return formatter.format(amount);
-  }
-
-  List<String> _getCategories() {
-    final categories =
-        boxProducts.values.map((product) => product.category).toSet().toList();
-    categories.sort();
-    categories.insert(0, 'All');
-    return categories;
-  }
-
-  Widget _buildCategoryButtons() {
-    final categories = _getCategories();
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: categories.map((category) {
-          final isSelected = category == selectedCategory;
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            child: ElevatedButton(
-              // style: ElevatedButton.styleFrom(
-              //   backgroundColor: isSelected
-              //       ? const Color.fromRGBO(255, 83, 137, 1)
-              //       : Colors.white,
-              //   foregroundColor: isSelected ? Colors.white : Colors.black,
-              //   side: BorderSide(
-              //     color: isSelected ? Colors.transparent : Colors.grey,
-              //   ),
-              // ),
-              style: ButtonStyle(
-                backgroundColor: isSelected
-                    ? const MaterialStatePropertyAll<Color>(
-                        Color.fromRGBO(255, 83, 137, 1),
-                      )
-                    : const MaterialStatePropertyAll<Color>(
-                        Colors.white,
-                      ),
-                foregroundColor: isSelected
-                    ? const MaterialStatePropertyAll(
-                        Colors.white,
-                      )
-                    : const MaterialStatePropertyAll(
-                        Colors.black,
-                      ),
-                shape: MaterialStatePropertyAll<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0),
-                  ),
-                ),
-              ),
-              onPressed: () {
-                setState(() {
-                  selectedCategory = category;
-                });
-              },
-              child: Text(category),
-            ),
-          );
-        }).toList(),
-      ),
-    );
   }
 
   @override
@@ -274,11 +214,19 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10.0),
-                _buildCategoryButtons(),
+                FilterCategory(
+                  categories: _getCategories(),
+                  selectedCategory: selectedCategory,
+                  onSelectCategory: (category) {
+                    setState(() {
+                      selectedCategory = category;
+                    });
+                  },
+                ),
                 const SizedBox(height: 10.0),
                 Expanded(
                   child: Padding(
@@ -291,18 +239,17 @@ class _MyHomePageState extends State<MyHomePage> {
                             child: Text('No item sell'),
                           );
                         }
-
-                        final products = selectedCategory == 'All'
-                            ? box.values.toList()
-                            : box.values
-                                .where((product) =>
-                                    product.category == selectedCategory)
-                                .toList();
-
                         return ListView.builder(
-                          itemCount: products.length,
+                          itemCount: box.length,
                           itemBuilder: (context, index) {
-                            final product = products[index];
+                            final product = box.getAt(index);
+                            if (product == null) {
+                              return Container();
+                            }
+                            if (selectedCategory != 'All' &&
+                                product.category != selectedCategory) {
+                              return Container(); // Skip rendering if not selected category
+                            }
                             return Slidable(
                               endActionPane: ActionPane(
                                 motion: const ScrollMotion(),
@@ -310,6 +257,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                   SlidableAction(
                                     onPressed: (BuildContext context) {
                                       box.deleteAt(index);
+                                      setState(() {
+                                        resresh = 'Yess';
+                                      });
                                     },
                                     padding: const EdgeInsets.all(5),
                                     backgroundColor:
@@ -337,55 +287,53 @@ class _MyHomePageState extends State<MyHomePage> {
                                   borderRadius: BorderRadius.circular(5.0),
                                 ),
                                 child: ListTile(
-                                  title: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                            product.name,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.w700,
-                                                fontSize: 18),
-                                          ),
-                                          Container(
-                                            margin:
-                                                const EdgeInsets.only(left: 7),
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 5, vertical: 1),
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: const Color.fromARGB(
-                                                      255, 0, 0, 0)),
-                                              borderRadius:
-                                                  BorderRadius.circular(2.0),
-                                            ),
-                                            child: Text(
-                                              product.quantity.toString(),
-                                              style:
-                                                  const TextStyle(fontSize: 13),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Text(
-                                        product.category,
-                                        style: const TextStyle(
-                                          fontSize: 13,
+                                    title: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          '${product.name}',
+                                          style: const TextStyle(
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 18),
                                         ),
+                                        Container(
+                                          margin:
+                                              const EdgeInsets.only(left: 7),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 5, vertical: 1),
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: const Color.fromARGB(
+                                                    255, 0, 0, 0)),
+                                            borderRadius:
+                                                BorderRadius.circular(2.0),
+                                          ),
+                                          child: Text(
+                                            '${product.quantity}',
+                                            style:
+                                                const TextStyle(fontSize: 13),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Text(
+                                      '${product.category}',
+                                      style: const TextStyle(
+                                        fontSize: 13,
                                       ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      Text(
-                                        formatCurrency(product.price),
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.w600),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    Text(
+                                      '${formatCurrency(product.price)}',
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                  ],
+                                )),
                               ),
                             );
                           },
@@ -400,5 +348,16 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+
+  List<String> _getCategories() {
+    final Set<String> categories = {'All'}; // Initialize with 'All'
+    for (var i = 0; i < boxProducts.length; i++) {
+      final product = boxProducts.getAt(i);
+      if (product != null) {
+        categories.add(product.category);
+      }
+    }
+    return categories.toList();
   }
 }
